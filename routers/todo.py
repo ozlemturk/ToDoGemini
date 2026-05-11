@@ -1,13 +1,13 @@
 # Handles todo pages, todo CRUD operations, and Gemini-powered todo description generation.
-from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
+from fastapi import APIRouter, Depends, Path, HTTPException, Request, Response
 from pydantic import BaseModel, Field
-from starlette import status
-from ..models import Base, Todo
-from ..database import engine, SessionLocal
-from starlette.responses import RedirectResponse
 from sqlalchemy.orm import Session
+from starlette import status
+from starlette.responses import RedirectResponse
+from models import Base, Todo
+from database import engine, SessionLocal
 from typing import Annotated
-from ..routers.auth import get_current_user
+from routers.auth import get_current_user
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -23,10 +23,10 @@ router = APIRouter(
 )
 
 # Connects FastAPI with todo-related HTML templates.
-templates = Jinja2Templates(directory="app/templates")
+templates = Jinja2Templates(directory="templates")
 
 # Creates database tables if they do not already exist.
-Base.metadata.create_all(bind=engine)
+Base.metadata.create_all(bind=engine) #bu yok
 
 # Request model for creating and updating todos.
 class TodoRequest(BaseModel):
@@ -142,7 +142,7 @@ async def update_todo(user: user_dependency,db: db_dependency,
 async def delete_todo(user: user_dependency,db: db_dependency, todo_id: int = Path(gt=0)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
-    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    todo = db.query(Todo).filter(Todo.id == todo_id).filter(Todo.owner_id == user.get("id")).first()
     if todo is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Todo not found")
 
@@ -176,7 +176,3 @@ def create_todo_with_gemini(todo_string:str):
     )
 
     return markdown_to_text(response.content)
-
-# Allows testing the Gemini function directly from this file.
-if __name__ == "__main__":
-    print(create_todo_with_gemini("buy milk "))

@@ -1,15 +1,13 @@
 # Handles user authentication, registration, JWT token creation, and login pages.
-import os
-
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
-from passlib.context import CryptContext
-from ..database import SessionLocal
 from typing import Annotated
 from sqlalchemy.orm import Session
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from ..models import User
+from database import SessionLocal
+from models import User
+from passlib.context import CryptContext
 from jose import jwt, JWTError
 from datetime import timedelta, datetime, timezone
 from fastapi.templating import Jinja2Templates
@@ -21,7 +19,7 @@ router = APIRouter(
 # Connects FastAPI with HTML templates.
 templates = Jinja2Templates(directory="templates")
 
-SECRET_KEY = os.getenv("SECRET_KEY")
+SECRET_KEY = "4nrb38cy2zel5qa6lf6w578oobd7itpnvygmg5y0ffakh9lcmqso6w2ejhlp38ey"
 ALGORITHM = "HS256"
 
 # Creates a database session for each request and closes it afterwards.
@@ -58,7 +56,7 @@ class Token(BaseModel):
 def create_access_token(username: str, user_id:int, role:str,expires_delta:timedelta):
     encode = {'sub':username, 'id':user_id, 'role': role}
     expires = datetime.now(timezone.utc) + expires_delta
-    encode. update({'exp':expires})
+    encode.update({'exp':expires})
     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
 
 # Checks whether the username and password are valid.
@@ -110,12 +108,25 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     db.commit()
 
 # Authenticates the user and returns a JWT access token.
-@router.post("/token")
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
-                                 db:db_dependency):
+@router.post("/token", response_model = Token)
+async def login_for_access_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+        db: db_dependency):
 
     user = authenticate_user(form_data.username, form_data.password, db)
+
     if not user:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail = "Incorrect username or password")
-    token = create_access_token(user.username, user.id, user.role,timedelta(minutes=60))
-    return {"access_token":token, "token_type":"bearer"}
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password"
+        )
+
+    token = create_access_token(
+        user.username,
+        user.id,
+        user.role,
+        timedelta(minutes=60)
+    )
+
+
+    return {"access_token": token, "token_type": "bearer"}

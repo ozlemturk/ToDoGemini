@@ -1,12 +1,12 @@
 # Main application file for the FastAPI project.
-from fastapi import FastAPI,Request
-from starlette.responses import RedirectResponse
-from .models import Base,Todo
+from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
+from starlette.responses import RedirectResponse
 from starlette import status
-from .database import engine
-from .routers.auth import router as auth_router
-from .routers.todo import router as todo_router
+from models import Base, Todo
+from database import engine
+from routers.auth import router as auth_router
+from routers.todo import router as todo_router
 import os
 
 app = FastAPI()
@@ -15,12 +15,12 @@ script_dir = os.path.dirname(__file__)
 st_abs_file_path = os.path.join(script_dir, "static/")
 
 # Mounts the static folder so CSS, JavaScript, and image files can be served.
-app.mount("/static",StaticFiles(directory = st_abs_file_path),name = "static")
+app.mount("/static",StaticFiles(directory=st_abs_file_path),name = "static")
 
 # Redirects the root URL to the todo page.
 @app.get("/")
 def read_root(request:Request):
-    return RedirectResponse(url = "/todo/todo-page", status_code=status.HTTP_302_FOUND)
+    return RedirectResponse(url ="/todo/todo-page", status_code=status.HTTP_302_FOUND)
 
 # Includes authentication routes.
 app.include_router(auth_router)
