@@ -15,7 +15,7 @@ script_dir = os.path.dirname(__file__)
 st_abs_file_path = os.path.join(script_dir, "static/")
 
 # Mounts the static folder so CSS, JavaScript, and image files can be served.
-app.mount("/static",StaticFiles(directory = "st_abs_file_path"),name = "static")
+app.mount("/static",StaticFiles(directory = st_abs_file_path),name = "static")
 
 # Redirects the root URL to the todo page.
 @app.get("/")
