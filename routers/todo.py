@@ -2,12 +2,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel, Field
 from starlette import status
-from models import Base, Todo
-from database import engine, SessionLocal
+from ..models import Base, Todo
+from ..database import engine, SessionLocal
 from starlette.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from typing import Annotated
-from routers.auth import get_current_user
+from ..routers.auth import get_current_user
 from fastapi.templating import Jinja2Templates
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -23,7 +23,7 @@ router = APIRouter(
 )
 
 # Connects FastAPI with todo-related HTML templates.
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="app/templates")
 
 # Creates database tables if they do not already exist.
 Base.metadata.create_all(bind=engine)

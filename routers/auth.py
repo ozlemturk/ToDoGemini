@@ -4,12 +4,12 @@ import os
 from fastapi import APIRouter, Depends, HTTPException, Request
 from pydantic import BaseModel
 from passlib.context import CryptContext
-from database import SessionLocal
+from ..database import SessionLocal
 from typing import Annotated
 from sqlalchemy.orm import Session
 from starlette import status
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
-from models import User
+from ..models import User
 from jose import jwt, JWTError
 from datetime import timedelta, datetime, timezone
 from fastapi.templating import Jinja2Templates
